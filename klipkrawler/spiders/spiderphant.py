@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 import scrapy
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
@@ -22,14 +25,6 @@ class SpiderphantSpider(CrawlSpider):
         )
     ]
 
-   # def parse(self, response):
-   #     main = newspaper.build(response.url, memoize_articles=False)
-   #     for article in main.articles:
-   #         current = Article(article.url)
-   #         current.download()
-   #         current.parse()
-   #         pdb.set_trace()
-
     def scrape_published_date(self, source, response):
         if source == "tribunadonorte":
             pubdate = response.css('section[id=r-main] section[id=content] header small').extract()
@@ -50,7 +45,8 @@ class SpiderphantSpider(CrawlSpider):
         item['published_date'] = self.scrape_published_date("tribunadonorte", response)
         item['images'] = self.scrape_images("tribunadonorte", article.images)
         item['videos'] = article.movies
-        with open('output.txt', 'w') as f:
+        with open('output.txt', 'a') as f:
             for key, value in item.iteritems():
-                print("%s = %s" % (key, value), file=f)
+              value = ''.join(value) if isinstance(value, list) else value
+              print('%s = %s' % (key, value), file=f)
 
