@@ -40,13 +40,18 @@ class SpiderphantSpider(CrawlSpider):
         article.parse()
         item = KlipkrawlerItem()
         item['title'] = article.title.encode('utf-8')
-        item['text'] = article.text
+        item['text'] = article.text.strip()
         item['url'] = response.url
         item['published_date'] = self.scrape_published_date("tribunadonorte", response)
         item['images'] = self.scrape_images("tribunadonorte", article.images)
         item['videos'] = article.movies
         with open('output.txt', 'a') as f:
             for key, value in item.iteritems():
-              value = ''.join(value) if isinstance(value, list) else value
-              print('%s = %s' % (key, value), file=f)
+                value = ''.join(value) if isinstance(value, list) else value
+                if value == None:
+                    value = ""
+                line = key + ' = ' + value
+                #print('%s = %s' % (key, value), file=f)
+                pdb.set_trace()
+                f.write(line + '\n')
 
