@@ -10,6 +10,8 @@
 
 BOT_NAME = 'klipkrawler'
 
+DEPTH_LIMIT = 1
+
 SPIDER_MODULES = ['klipkrawler.spiders']
 NEWSPIDER_MODULE = 'klipkrawler.spiders'
 
