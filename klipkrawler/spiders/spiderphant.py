@@ -51,6 +51,6 @@ class SpiderphantSpider(CrawlSpider):
         item['images'] = self.scrape_images("tribunadonorte", article.images)
         item['videos'] = article.movies
         with open('output.txt', 'w') as f:
-            for key, value in item.fields.iteritems():
+            for key, value in item.iteritems():
                 print("%s = %s" % (key, value))
 
