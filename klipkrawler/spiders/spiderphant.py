@@ -52,5 +52,5 @@ class SpiderphantSpider(CrawlSpider):
         item['videos'] = article.movies
         with open('output.txt', 'w') as f:
             for key, value in item.iteritems():
-                print("%s = %s" % (key, value))
+                print("%s = %s" % (key, value), file=f)
 
