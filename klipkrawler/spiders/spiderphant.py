@@ -7,6 +7,7 @@ import scrapy
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
 from klipkrawler.items import KlipkrawlerItem
+import datetime
 import newspaper
 from newspaper import Article
 import pdb
@@ -15,23 +16,45 @@ class SpiderphantSpider(CrawlSpider):
     name = "spiderphant"
     allowed_domains = ['www.tribunadonorte.com.br',
                        'blog.tribunadonorte.com.br', 
-                       'www.thaisagalvao.com.br']
+                       'www.thaisagalvao.com.br',
+                       'nominuto.com/noticias',
+                       'robsoncarvalho.com',
+                       'www.aluiziodecarnaubais.blogspot.com.br',
+                       'www.assessorn.com',
+                       'www.caiooliveira.com',
+                       'www.nahorah.net',
+                       'www.portalmercadoaberto.com.br',
+                       'www.rodrigoloureiro.com.br'
+                    ]
+
     start_urls = [
-        'http://www.tribunadonorte.com.br',
-        'http://www.thaisagalvao.com.br'
+        #'http://www.tribunadonorte.com.br',
+        'http://www.thaisagalvao.com.br',
+        #'http://nominuto.com/noticias',
+        #'http://robsoncarvalho.com',
+        #'http://www.aluiziodecarnaubais.blogspot.com.br',
+        #'http://www.assessorn.com',
+        #'http://www.caiooliveira.com',
+        #'http://www.nahorah.net',
+        #'http://www.portalmercadoaberto.com.br',
+        #'http://www.rodrigoloureiro.com.br'
     ]
 
     rules = [
-        Rule(LinkExtractor(allow=['/noticia/', r'/\d{4}\/\d{2}\/\d{2}/']), callback='parse_tribuna'),
+        Rule(LinkExtractor(allow=['noticia', '/novo/coluna/', r'/\d{4}\/\d{2}\/']), callback='parse_tribuna'),
    #     Rule(LinkExtractor(deny=['cadastro.tribunadonorte.com.br']))
     ]
 
     def scrape_published_date(self, response, published_date):
+        pubdate = []
+        if isinstance(published_date, datetime.datetime):
+            published_date = published_date.strftime("%d/%m/%Y")
         if "tribunadonorte.com.br" in response.url:
             pubdate = response.css('section[id=r-main] section[id=content] header small').extract()
-            return pubdate[0] if pubdate else None
-        else:
-            return published_date.strftime('%d/%m/%Y')
+        elif "robsoncarvalho.com" in response.url:
+            pubdate = response.css("time::attr(datetime)").extract()
+        return pubdate[0] if len(pubdate) > 0 else published_date
+        
 
     def scrape_images(self, response, image_list):
         if "tribunadonorte.com.br" in response.url:
