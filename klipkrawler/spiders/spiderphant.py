@@ -50,9 +50,17 @@ class SpiderphantSpider(CrawlSpider):
             published_date = published_date.strftime("%d/%m/%Y")
         if "tribunadonorte.com.br" in response.url:
             pubdate = response.css('section[id=r-main] section[id=content] header small').extract()
+            # Some witchery here. Crazy, I know, but, necessary.
+            # This is how we get pubdate up here:
+            # "<small>Publicação: 2015-05-08 10:49:00 | Comentários: 0</small>"
+            # So we gotta hack and slash that to get our datetime
+            if len(pubdate) > 0:
+                pubdate = pubdate[0].split(" | ")[0].split(": ")[1].strip().replace("-", "/")
+            else:
+                pubdate = None
         elif "robsoncarvalho.com" in response.url:
             pubdate = response.css("time::attr(datetime)").extract()
-        return pubdate[0] if len(pubdate) > 0 else published_date
+        return pubdate if pubdate else published_date
         
 
     def scrape_images(self, response, image_list):
@@ -61,18 +69,24 @@ class SpiderphantSpider(CrawlSpider):
         else:
             return image_list
 
+    def scrape_text(self, response, text):
+        if "tribunadonorte" in response.url:
+            split_text = text.split("\n")
+            split_size = len(split_text)
+            scraped_text = split_text[split_size - 1] if split_size > 0 else text
+        return scraped_text if scraped_text else text
+
     def parse_news(self, response):
         article = Article(response.url)
         article.download()
         article.parse()
         item = KlipkrawlerItem()
         item['title'] = article.title.encode('utf-8')
-        item['text'] = article.text.strip()
+        item['text'] = self.scrape_text(response, article.text)
         item['url'] = response.url
         item['published_date'] = self.scrape_published_date(response, article.publish_date)
         item['images'] = self.scrape_images(response, article.images)
         item['videos'] = article.movies
-        pdb.set_trace()
         with open('output.txt', 'a') as f:
             for key, value in item.iteritems():
                 value = ''.join(value) if isinstance(value, list) else value
