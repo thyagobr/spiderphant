@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -28,21 +27,21 @@ class SpiderphantSpider(CrawlSpider):
                     ]
 
     start_urls = [
-        #'http://www.tribunadonorte.com.br',
+        'http://www.tribunadonorte.com.br',
         'http://www.thaisagalvao.com.br',
-        #'http://nominuto.com/noticias',
-        #'http://robsoncarvalho.com',
-        #'http://www.aluiziodecarnaubais.blogspot.com.br',
-        #'http://www.assessorn.com',
-        #'http://www.caiooliveira.com',
-        #'http://www.nahorah.net',
-        #'http://www.portalmercadoaberto.com.br',
-        #'http://www.rodrigoloureiro.com.br'
+        'http://nominuto.com/noticias',
+        'http://robsoncarvalho.com',
+        'http://www.aluiziodecarnaubais.blogspot.com.br',
+        'http://www.assessorn.com',
+        'http://www.caiooliveira.com',
+        'http://www.nahorah.net',
+        'http://www.portalmercadoaberto.com.br',
+        'http://www.rodrigoloureiro.com.br'
     ]
 
     rules = [
-        Rule(LinkExtractor(allow=['noticia', '/novo/coluna/', r'/\d{4}\/\d{2}\/']), callback='parse_tribuna'),
-   #     Rule(LinkExtractor(deny=['cadastro.tribunadonorte.com.br']))
+        Rule(LinkExtractor(allow=['noticia', '/novo/coluna/', r'/\d{4}\/\d{2}\/']), callback='parse_news'),
+        Rule(LinkExtractor(deny=['cadastro.tribunadonorte.com.br']))
     ]
 
     def scrape_published_date(self, response, published_date):
@@ -62,9 +61,7 @@ class SpiderphantSpider(CrawlSpider):
         else:
             return image_list
 
-    def parse_tribuna(self, response):
-        #if response.url == "http://cadastro.tribunadonorte.com.br/leitor/entrar":
-        #    return None
+    def parse_news(self, response):
         article = Article(response.url)
         article.download()
         article.parse()
@@ -75,12 +72,12 @@ class SpiderphantSpider(CrawlSpider):
         item['published_date'] = self.scrape_published_date(response, article.publish_date)
         item['images'] = self.scrape_images(response, article.images)
         item['videos'] = article.movies
+        pdb.set_trace()
         with open('output.txt', 'a') as f:
             for key, value in item.iteritems():
                 value = ''.join(value) if isinstance(value, list) else value
                 if value == None:
                     value = ""
                 line = key + ' = ' + value
-                #print('%s = %s' % (key, value), file=f)
                 f.write(line + '\n')
 
