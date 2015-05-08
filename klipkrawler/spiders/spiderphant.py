@@ -40,8 +40,9 @@ class SpiderphantSpider(CrawlSpider):
     ]
 
     rules = [
-        Rule(LinkExtractor(allow=['noticia', '/novo/coluna/', r'/\d{4}\/\d{2}\/']), callback='parse_news'),
-        Rule(LinkExtractor(deny=['cadastro.tribunadonorte.com.br']))
+        Rule(LinkExtractor(allow=['noticia', '/novo/coluna/', r'/\d{4}\/\d{2}\/'],
+                            deny=['cadastro.tribunadonorte.com.br']),
+                            callback='parse_news')
     ]
 
     def scrape_published_date(self, response, published_date):
@@ -70,6 +71,7 @@ class SpiderphantSpider(CrawlSpider):
             return image_list
 
     def scrape_text(self, response, text):
+        scraped_text = None
         if "tribunadonorte" in response.url:
             split_text = text.split("\n")
             split_size = len(split_text)
