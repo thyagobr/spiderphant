@@ -2,11 +2,13 @@
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
 import scrapy
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
 from klipkrawler.items import KlipkrawlerItem
 import datetime
+from urlparse import urlparse
 import newspaper
 from newspaper import Article
 import pdb
@@ -60,7 +62,7 @@ class SpiderphantSpider(CrawlSpider):
             else:
                 pubdate = None
         elif "robsoncarvalho.com" in response.url:
-            pubdate = response.css("time::attr(datetime)").extract()
+            pubdate = response.css("time::attr(datetime)").extract()[0]
         return pubdate if pubdate else published_date
         
 
@@ -89,6 +91,7 @@ class SpiderphantSpider(CrawlSpider):
         item['published_date'] = self.scrape_published_date(response, article.publish_date)
         item['images'] = self.scrape_images(response, article.images)
         item['videos'] = article.movies
+        item['source'] = urlparse(response.url).hostname
         with open('output.txt', 'a') as f:
             for key, value in item.iteritems():
                 value = ''.join(value) if isinstance(value, list) else value
