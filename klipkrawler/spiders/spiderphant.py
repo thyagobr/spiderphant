@@ -7,7 +7,7 @@ import scrapy
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
 from klipkrawler.items import KlipkrawlerItem
-import datetime
+from datetime import datetime
 from urlparse import urlparse
 import newspaper
 from newspaper import Article
@@ -50,7 +50,7 @@ class SpiderphantSpider(CrawlSpider):
 
     def scrape_published_date(self, response, published_date):
         pubdate = []
-        if isinstance(published_date, datetime.datetime):
+        if isinstance(published_date, datetime):
             published_date = published_date.strftime("%d/%m/%Y")
         if "tribunadonorte.com.br" in response.url:
             pubdate = response.css('section[id=r-main] section[id=content] header small').extract()
@@ -94,9 +94,12 @@ class SpiderphantSpider(CrawlSpider):
         item['text'] = self.scrape_text(response, article.text)
         item['url'] = response.url
         item['published_date'] = self.scrape_published_date(response, article.publish_date)
+        item['scraped_date'] = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         item['images'] = self.scrape_images(response, article.images)
         item['videos'] = article.movies
         item['source'] = urlparse(response.url).hostname
+        item['language'] = article.meta_lang
+        pdb.set_trace()
         yield item
         #with open('output.txt', 'a') as f:
         #    for key, value in item.iteritems():
