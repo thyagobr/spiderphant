@@ -11,6 +11,7 @@ import datetime
 from urlparse import urlparse
 import newspaper
 from newspaper import Article
+import json
 import pdb
 
 class SpiderphantSpider(CrawlSpider):
@@ -30,15 +31,15 @@ class SpiderphantSpider(CrawlSpider):
 
     start_urls = [
         'http://www.tribunadonorte.com.br',
-        'http://www.thaisagalvao.com.br',
-        'http://nominuto.com/noticias',
-        'http://robsoncarvalho.com',
-        'http://www.aluiziodecarnaubais.blogspot.com.br',
-        'http://www.assessorn.com',
-        'http://www.caiooliveira.com',
-        'http://www.nahorah.net',
-        'http://www.portalmercadoaberto.com.br',
-        'http://www.rodrigoloureiro.com.br'
+       # 'http://www.thaisagalvao.com.br',
+       # 'http://nominuto.com/noticias',
+       # 'http://robsoncarvalho.com',
+       # 'http://www.aluiziodecarnaubais.blogspot.com.br',
+       # 'http://www.assessorn.com',
+       # 'http://www.caiooliveira.com',
+       # 'http://www.nahorah.net',
+       # 'http://www.portalmercadoaberto.com.br',
+       # 'http://www.rodrigoloureiro.com.br'
     ]
 
     rules = [
@@ -64,13 +65,17 @@ class SpiderphantSpider(CrawlSpider):
         elif "robsoncarvalho.com" in response.url:
             pubdate = response.css("time::attr(datetime)").extract()[0]
         return pubdate if pubdate else published_date
-        
 
     def scrape_images(self, response, image_list):
+        images = []
         if "tribunadonorte.com.br" in response.url:
-            return filter(lambda image:'arquivos' in image, image_list) 
-        else:
-            return image_list
+            image_list = filter(lambda image:'arquivos' in image, image_list) 
+        for image_url in image_list:
+            image_info = {}
+            image_info['url'] = image_url
+            image_info['alt'] = ''
+            images.append(image_info)
+        return images
 
     def scrape_text(self, response, text):
         scraped_text = None
@@ -92,11 +97,12 @@ class SpiderphantSpider(CrawlSpider):
         item['images'] = self.scrape_images(response, article.images)
         item['videos'] = article.movies
         item['source'] = urlparse(response.url).hostname
-        with open('output.txt', 'a') as f:
-            for key, value in item.iteritems():
-                value = ''.join(value) if isinstance(value, list) else value
-                if value == None:
-                    value = ""
-                line = key + ' = ' + value
-                f.write(line + '\n')
+        yield item
+        #with open('output.txt', 'a') as f:
+        #    for key, value in item.iteritems():
+        #        value = ''.join(value) if isinstance(value, list) else value
+        #        if value == None:
+        #            value = ""
+        #        line = key + ' = ' + value
+        #        f.write(line + '\n')
 
